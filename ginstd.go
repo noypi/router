@@ -31,8 +31,8 @@ type IRoutesStd interface {
 	HEAD(string, ...http.HandlerFunc) IRoutesStd
 }
 
-type IRoutes = gin.IRoutes
-type HandlerFunc = gin.HandlerFunc
+//type IRoutes = gin.IRoutes
+//type HandlerFunc = gin.HandlerFunc
 
 type EngineStd struct {
 	*gin.Engine

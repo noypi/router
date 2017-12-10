@@ -6,24 +6,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Context = gin.Context
+//type Context = gin.Context
 
 type _ContextW struct {
 	http.ResponseWriter
-	*Context
+	c *gin.Context
 }
+
+func ContextW(w http.ResponseWriter) *gin.Context {
+	return w.(*_ContextW).c
+}
+
+func NewContextW(c *gin.Context) *_ContextW {
+	return &_ContextW{c: c}
+}
+
+// ResponseWriter
 
 func (c *_ContextW) Header() http.Header {
-	return c.Context.Writer.Header()
+	return c.c.Writer.Header()
 }
 
-func ContextW(w http.ResponseWriter) *Context {
-	return w.(*_ContextW).Context
+func (c *_ContextW) Write(bb []byte) (int, error) {
+	return c.c.Writer.Write(bb)
 }
 
-func NewContextW(c *Context) *_ContextW {
-	return &_ContextW{
-		Context:        c,
-		ResponseWriter: c.Writer,
-	}
+func (c *_ContextW) WriteHeader(n int) {
+	c.c.Writer.WriteHeader(n)
 }
