@@ -1,4 +1,4 @@
-package gin
+package router
 
 import (
 	"net/http"
@@ -48,22 +48,6 @@ func WrapGin(o *gin.Engine) *EngineStd {
 
 func (e *EngineStd) Gin() *gin.Engine {
 	return e.Engine
-}
-
-func WrapF(handlers ...http.HandlerFunc) []HandlerFunc {
-	ginh := make([]HandlerFunc, len(handlers))
-	for i, h := range handlers {
-		ginh[i] = gin.WrapF(h)
-	}
-	return ginh
-}
-
-func WrapH(handlers ...http.Handler) []HandlerFunc {
-	ginh := make([]HandlerFunc, len(handlers))
-	for i, h := range handlers {
-		ginh[i] = gin.WrapH(h)
-	}
-	return ginh
 }
 
 // with method
@@ -176,20 +160,4 @@ func (e *EngineStd) UseH(handlers ...http.Handler) IRoutesStd {
 func (e *EngineStd) Use(handlers ...http.HandlerFunc) IRoutesStd {
 	wrapF(e.Engine.Use, handlers)
 	return e
-}
-
-func wrapH(fn func(handlers ...HandlerFunc) IRoutes, handlers []http.Handler) {
-	fn(WrapH(handlers...)...)
-}
-
-func wrapF(fn func(handlers ...HandlerFunc) IRoutes, handlers []http.HandlerFunc) {
-	fn(WrapF(handlers...)...)
-}
-
-func wrapMethodH(fn func(relativePath string, handlers ...HandlerFunc) IRoutes, relativePath string, handlers []http.Handler) {
-	fn(relativePath, WrapH(handlers...)...)
-}
-
-func wrapMethodF(fn func(relativePath string, handlers ...HandlerFunc) IRoutes, relativePath string, handlers []http.HandlerFunc) {
-	fn(relativePath, WrapF(handlers...)...)
 }
