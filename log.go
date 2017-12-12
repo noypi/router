@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/gin-gonic/gin"
 	"github.com/noypi/logfn"
 )
 
@@ -38,7 +37,7 @@ func getLogFunc(ctx context.Context, name _logFuncType) (fn logfn.LogFunc) {
 		return log.Printf
 	}
 
-	c := ctx.(*gin.Context)
+	c := ToStore(ctx)
 
 	if o, exists := c.Get(name); exists {
 		fn = (o).(logfn.LogFunc)

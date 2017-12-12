@@ -7,54 +7,59 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func WrapF(handlers ...http.HandlerFunc) []gin.HandlerFunc {
+type Handler func(context.Context)
+
+func Wrap(handlers ...interface{}) []gin.HandlerFunc {
 	ginh := make([]gin.HandlerFunc, len(handlers))
 	for i, h := range handlers {
-		ginh[i] = ginWrapF(h)
+		ginh[i] = GinWrap(h)
 	}
 	return ginh
 }
 
-func WrapH(handlers ...http.Handler) []gin.HandlerFunc {
-	ginh := make([]gin.HandlerFunc, len(handlers))
-	for i, h := range handlers {
-		ginh[i] = ginWrapH(h)
+func GinWrap(f interface{}) gin.HandlerFunc {
+	switch fn := f.(type) {
+
+	case func(http.ResponseWriter, *http.Request):
+		return GinWrapF(fn)
+	case http.HandlerFunc:
+		return GinWrapF(fn)
+
+	case func(context.Context):
+		return GinWrapC(fn)
+	case Handler:
+		return GinWrapC(fn)
+
+	case http.Handler:
+		return GinWrapH(fn)
+
+	default:
+		panic("unsupported handler type")
 	}
-	return ginh
 }
 
-func GetRequest(ctx context.Context) *http.Request {
-	return ctx.(*gin.Context).Request
+func GinWrapC(f Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		f(c)
+	}
 }
 
-func GetWriter(ctx context.Context) http.ResponseWriter {
-	return ctx.(*gin.Context).Writer
-}
-
-func ginWrapF(f http.HandlerFunc) gin.HandlerFunc {
+func GinWrapF(f http.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		f(NewContextW(c), c.Request)
 	}
 }
 
-func ginWrapH(h http.Handler) gin.HandlerFunc {
+func GinWrapH(h http.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		h.ServeHTTP(NewContextW(c), c.Request)
 	}
 }
 
-func wrapH(fn func(handlers ...gin.HandlerFunc) gin.IRoutes, handlers []http.Handler) {
-	fn(WrapH(handlers...)...)
+func wrap(fn func(handlers ...gin.HandlerFunc) gin.IRoutes, handlers []interface{}) {
+	fn(Wrap(handlers...)...)
 }
 
-func wrapF(fn func(handlers ...gin.HandlerFunc) gin.IRoutes, handlers []http.HandlerFunc) {
-	fn(WrapF(handlers...)...)
-}
-
-func wrapMethodH(fn func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes, relativePath string, handlers []http.Handler) {
-	fn(relativePath, WrapH(handlers...)...)
-}
-
-func wrapMethodF(fn func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes, relativePath string, handlers []http.HandlerFunc) {
-	fn(relativePath, WrapF(handlers...)...)
+func wrapMethod(fn func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes, relativePath string, handlers []interface{}) {
+	fn(relativePath, Wrap(handlers...)...)
 }
