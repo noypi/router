@@ -17,6 +17,30 @@ func Wrap(handlers ...interface{}) []gin.HandlerFunc {
 	return ginh
 }
 
+func WrapF(handlers ...http.HandlerFunc) []gin.HandlerFunc {
+	ginh := make([]gin.HandlerFunc, len(handlers))
+	for i, h := range handlers {
+		ginh[i] = GinWrapF(h)
+	}
+	return ginh
+}
+
+func WrapH(handlers ...http.Handler) []gin.HandlerFunc {
+	ginh := make([]gin.HandlerFunc, len(handlers))
+	for i, h := range handlers {
+		ginh[i] = GinWrapH(h)
+	}
+	return ginh
+}
+
+func WrapC(handlers ...Handler) []gin.HandlerFunc {
+	ginh := make([]gin.HandlerFunc, len(handlers))
+	for i, h := range handlers {
+		ginh[i] = GinWrapC(h)
+	}
+	return ginh
+}
+
 func GinWrap(f interface{}) gin.HandlerFunc {
 	switch fn := f.(type) {
 
@@ -56,10 +80,10 @@ func GinWrapH(h http.Handler) gin.HandlerFunc {
 	}
 }
 
-func wrap(fn func(handlers ...gin.HandlerFunc) gin.IRoutes, handlers []interface{}) {
-	fn(Wrap(handlers...)...)
+func wrap(fn func(handlers ...gin.HandlerFunc) gin.IRoutes, handlers []gin.HandlerFunc) {
+	fn(handlers...)
 }
 
-func wrapMethod(fn func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes, relativePath string, handlers []interface{}) {
-	fn(relativePath, Wrap(handlers...)...)
+func wrapMethod(fn func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes, relativePath string, handlers []gin.HandlerFunc) {
+	fn(relativePath, handlers...)
 }
