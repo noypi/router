@@ -19,10 +19,15 @@ func Wrap(handlers ...interface{}) []gin.HandlerFunc {
 
 func GinWrap(f interface{}) gin.HandlerFunc {
 	switch fn := f.(type) {
-	case Handler:
-		return GinWrapC(fn)
+		
+	case func(http.ResponseWriter, r *http.Request):
+		fallthrough
 	case http.HandlerFunc:
 		return GinWrapF(fn)
+
+	case Handler:
+		return GinWrapC(fn)
+		
 	case http.Handler:
 		return GinWrapH(fn)
 	default:
