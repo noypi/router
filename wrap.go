@@ -57,6 +57,9 @@ func GinWrap(f interface{}) gin.HandlerFunc {
 	case http.Handler:
 		return GinWrapH(fn)
 
+	case gin.HandlerFunc:
+		return fn
+
 	default:
 		panic("unsupported handler type")
 	}
