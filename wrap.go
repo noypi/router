@@ -19,17 +19,20 @@ func Wrap(handlers ...interface{}) []gin.HandlerFunc {
 
 func GinWrap(f interface{}) gin.HandlerFunc {
 	switch fn := f.(type) {
-		
-	case func(http.ResponseWriter, r *http.Request):
-		fallthrough
+
+	case func(http.ResponseWriter, *http.Request):
+		return GinWrapF(fn)
 	case http.HandlerFunc:
 		return GinWrapF(fn)
 
+	case func(context.Context):
+		return GinWrapC(fn)
 	case Handler:
 		return GinWrapC(fn)
-		
+
 	case http.Handler:
 		return GinWrapH(fn)
+
 	default:
 		panic("unsupported handler type")
 	}
